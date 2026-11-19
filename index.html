@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="bg"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d97706"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Електро цени"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><title>Калкулатор – електромонтажни услуги</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7f9;--card:#fff;--tx:#1a1d23;--mu:#6b7280;--ac:#d97706;--ac2:#fff;--bd:#e3e6ea;--in:#f0f2f5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--card:#1d2026;--tx:#eceef1;--mu:#9aa1ad;--ac:#f59e0b;--ac2:#1a1200;--bd:#2c3038;--in:#262a31}}
+:root[data-theme="dark"]{--bg:#14161a;--card:#1d2026;--tx:#eceef1;--mu:#9aa1ad;--ac:#f59e0b;--ac2:#1a1200;--bd:#2c3038;--in:#262a31}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:150px}
+header{padding:16px 16px 8px}h1{font-size:19px;margin:0 0 2px}.sub{color:var(--mu);font-size:12.5px}
+.top{padding:0 16px;display:grid;gap:8px}
+input[type=text],input[type=search]{width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit}
+details{margin:10px 16px;background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+summary{padding:13px 14px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;gap:8px;list-style:none}
+summary::-webkit-details-marker{display:none}summary .cnt{color:var(--ac);font-weight:600;font-size:13px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--bd)}
+.row .nm{flex:1;min-width:0}.row .nm b{font-weight:500;display:block}.row .pr{color:var(--mu);font-size:12.5px}
+.row.on{background:color-mix(in srgb,var(--ac) 9%,transparent)}
+.q{display:flex;align-items:center;gap:4px}
+.q button{width:34px;height:34px;border-radius:9px;border:1px solid var(--bd);background:var(--in);color:var(--tx);font-size:18px;line-height:1}
+.q input{width:58px;text-align:center;padding:7px 2px;border:1px solid var(--bd);border-radius:9px;background:var(--in);color:var(--tx);font:inherit}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.tot .l{color:var(--mu);font-size:12.5px}.tot .v{font-size:19px;font-weight:700}
+.btns{display:flex;gap:8px}.btns button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--in);color:var(--tx);font:inherit;font-weight:600}
+.btns .p{background:var(--ac);color:var(--ac2);border-color:var(--ac);flex:2}.btns button:disabled{opacity:.45}
+[hidden]{display:none!important}.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 2px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;font-size:13px;font-weight:600}.seg button.on{background:var(--ac);color:var(--ac2);border-color:var(--ac)}#vb{display:grid;gap:8px;padding:10px;border:1px dashed var(--ac);border-radius:12px}#dw{display:grid;gap:4px;font-size:13.5px}#dw input{width:100%;accent-color:var(--ac)}
+#msg{font-size:12.5px;color:var(--mu);text-align:center;min-height:16px;margin-top:6px}
+</style></head><body>
+<header><h1>⚡ Калкулатор – електромонтажни услуги</h1><div class="sub">Цени в EUR · по оферта (1 € = 1,95583 лв) · 19.11.2026</div></header>
+<div class="top"><input type="text" id="cl" placeholder="Клиент / обект (за PDF)"><div id="vb"><div class="seg"><button data-v="1" class="on">Цена</button><button data-v="4">Отстъпка</button></div><div id="dw" hidden><label>Отстъпка: <b id="dv">10%</b></label><input type="range" id="dr" min="5" max="50" step="5" value="10"></div><div class="sub">Вариантите не се виждат в PDF</div></div><input type="search" id="s" placeholder="Търсене на дейност…"></div>
+<div id="list"></div>
+<div class="bar"><div class="tot"><span class="l" id="lbl">Общо</span><span class="v" id="tv">0,00 €</span></div>
+<div class="btns"><button id="clr">Изчисти</button><button class="p" id="pdf" disabled>Изтегли PDF</button></div><div id="msg"></div></div>
+<script>
+const D=[[1, "Контакти", "Свързване на единичен контакт", "бр.", 4.09, 4.09], [2, "Контакти", "Свързване на двоен контакт", "бр.", 8.18, 8.18], [3, "Контакти", "Свързване на троен контакт", "бр.", 12.27, 12.27], [4, "Контакти", "Свързване на четворен контакт", "бр.", 15, 22], [5, "Контакти", "Свързване на външен контакт", "бр.", 4.09, 4.09], [6, "Контакти", "Свързване на трифазен контакт 400 V", "бр.", 20, 35], [7, "Ключове", "Свързване на единичен ключ", "бр.", 4.09, 4.09], [8, "Ключове", "Свързване на двоен ключ", "бр.", 4.09, 4.09], [9, "Ключове", "Свързване на девиаторен ключ", "бр.", 4.09, 4.09], [10, "Ключове", "Свързване на кръстат ключ", "бр.", 4.09, 4.09], [11, "Ключове", "Свързване на троен ключ", "бр.", 12, 18], [12, "Ключове", "Свързване на димер", "бр.", 12, 20], [13, "Ключове", "Свързване на бойлерен ключ", "бр.", 7.67, 7.67], [14, "Електроуреди", "Свързване на електрически бойлер", "бр.", 20, 35], [15, "Електроуреди", "Свързване на готварска печка", "бр.", 25, 40], [16, "Електроуреди", "Свързване на фурна за вграждане", "бр.", 20, 35], [17, "Електроуреди", "Свързване на електрически котлони", "бр.", 25, 40], [18, "Електроуреди", "Свързване на индукционен плот", "бр.", 30, 45], [19, "Електроуреди", "Свързване на трифазна печка/уред", "бр.", 35, 60], [20, "Кабели", "Кабел 3×1,5 mm² – по скара", "м", 2, 2], [21, "Кабели", "Кабел 3×1,5 mm² – със скоби", "м", 1.18, 1.18], [22, "Кабели", "Кабел 3×2,5 mm² – по скара", "м", 2, 2], [23, "Кабели", "Кабел 3×2,5 mm² – със скоби", "м", 1.28, 1.28], [24, "Кабели", "Кабел 3×4 mm² – по скара", "м", 2.5, 2.5], [25, "Кабели", "Кабел 3×4 mm² – със скоби", "м", 1.28, 1.28], [26, "Кабели", "Кабел 3×6 mm² – по скара", "м", 3.5, 3.5], [27, "Кабели", "Кабел 3×6 mm² – със скоби", "м", 3.7, 3.7], [28, "Кабели", "Кабел 3×10 mm² – по скара", "м", 4.9, 4.9], [29, "Кабели", "Кабел 3×10 mm² – със скоби", "м", 5.9, 5.9], [30, "Кабели", "Кабел 3×16 mm² – по скара", "м", 4.9, 4.9], [31, "Кабели", "Кабел 3×16 mm² – със скоби", "м", 6.8, 6.8], [32, "Кабели", "Кабел 5×1,5 mm² – по скара", "м", 2.2, 2.2], [33, "Кабели", "Кабел 5×1,5 mm² – със скоби", "м", 2.5, 2.5], [34, "Кабели", "Кабел 5×2,5 mm² – по скара", "м", 2.5, 2.5], [35, "Кабели", "Кабел 5×2,5 mm² – със скоби", "м", 3, 3], [36, "Кабели", "Кабел 5×4 mm² – по скара", "м", 2.5, 2.5], [37, "Кабели", "Кабел 5×4 mm² – със скоби", "м", 3, 3], [38, "Кабели", "Кабел 5×6 mm² – по скара", "м", 3.5, 3.5], [39, "Кабели", "Кабел 5×6 mm² – със скоби", "м", 4, 4], [40, "Кабели", "Кабел 5×10 mm² – по скара", "м", 4.6, 4.6], [41, "Кабели", "Кабел 5×10 mm² – със скоби", "м", 5.9, 5.9], [42, "Кабели", "Кабел 5×16 mm² – по скара", "м", 5.9, 5.9], [43, "Кабели", "Кабел 5×16 mm² – със скоби", "м", 6.7, 6.7], [44, "Електрически табла", "Свързване на табло до 4 модула", "бр.", 35, 55], [45, "Електрически табла", "Свързване на табло до 6 модула", "бр.", 45, 70], [46, "Електрически табла", "Свързване на табло до 8 модула", "бр.", 55, 90], [47, "Електрически табла", "Свързване на табло до 12 модула", "бр.", 80, 120], [48, "Електрически табла", "Свързване на табло до 16 модула", "бр.", 100, 160], [49, "Електрически табла", "Свързване на табло до 24 модула", "бр.", 140, 220], [50, "Електрически табла", "Свързване на табло до 36 модула", "бр.", 200, 300], [51, "Електрически табла", "Свързване на табло до 48 модула", "бр.", 260, 400], [52, "Електрически табла", "Монтаж на автоматичен предпазител 1P", "бр.", 8, 12], [53, "Електрически табла", "Монтаж на дефектнотокова защита", "бр.", 15, 25], [54, "Електрически табла", "Проверка, тестване и надписване на табло", "бр.", 20, 50], [55, "Допълнителни дейности", "Доставка и монтаж на разклонителна кутия", "бр.", 2.1, 2.1], [56, "Допълнителни дейности", "Полагане на гофрирана тръба", "м", 2, 5], [57, "Допълнителни дейности", "Къртене на канал в тухла", "м", 5, 10], [58, "Допълнителни дейности", "Къртене на канал в бетон", "м", 10, 20], [59, "Допълнителни дейности", "Монтаж на конзола в тухла", "бр.", 4.5, 4.5], [60, "Допълнителни дейности", "Монтаж на конзола в бетон", "бр.", 4.5, 4.5], [61, "Допълнителни дейности", "Монтаж на PVC кабелен канал", "м", 5, 8], [62, "Електрически табла", "Доставка и монтаж на разпределително ел. табло (по схема)", "бр.", 337.45, 337.45], [63, "Контакти", "Монтаж на розетка тип h31 (3 бр. Шуко + 1 бр. RJ45/Cat.6)", "бр.", 20.45, 20.45], [64, "Кабели", "Суха разделка и свързване на кабел 3×1,5 mm²", "бр.", 1.02, 1.02], [65, "Кабели", "Суха разделка и свързване на кабел 3×2,5 mm²", "бр.", 1.02, 1.02], [66, "Кабели", "Суха разделка и свързване на кабел 3×4 mm²", "бр.", 1.02, 1.02], [67, "Кабели", "Изпитване на кабел 3×1,5 mm²", "бр.", 1.02, 1.02], [68, "Кабели", "Изпитване на кабел 3×2,5 mm²", "бр.", 1.02, 1.02], [69, "Кабели", "Изпитване на кабел 3×4 mm²", "бр.", 1.02, 1.02], [70, "Допълнителни дейности", "Електрически измервания (импеданс, дефектнотокова защита)", "к-т", 40.9, 40.9], [71, "Доставка на кабел", "Доставка на кабел 3×1,5 mm²", "м", 0.87, 0.87], [72, "Доставка на кабел", "Доставка на кабел 3×2,5 mm²", "м", 1.53, 1.53], [73, "Доставка на кабел", "Доставка на кабел 3×4 mm²", "м", 2.57, 2.57], [74, "Слаботокови инсталации", "Доставка на кабел F/UTP Cat.6", "м", 0.43, 0.43], [75, "Слаботокови инсталации", "Полагане на кабел F/UTP Cat.6 открито на скоби", "м", 0.77, 0.77], [76, "Слаботокови инсталации", "Суха разделка и кримпване на кабел F/UTP Cat.6", "м", 1.69, 1.69], [77, "Слаботокови инсталации", "Доставка и монтаж на слаботокова разпределителна кутия със Wi-Fi рутер", "бр.", 38.35, 38.35], [78, "Слаботокови инсталации", "Тестване на компютърна мрежа", "бр.", 40.9, 40.9]];
+const NOTE="Ориентировъчни цени в евро. Окончателната стойност се определя на база реално изпълненото количество за всеки вид дейност.";
+let V=1,DISC=10;const up=d=>d[4];const qty={};const f=n=>n.toFixed(2).replace(".",",");
+const cats=[...new Set(D.map(d=>d[1]))];const L=document.getElementById("list");
+cats.forEach(c=>{const dt=document.createElement("details");dt.dataset.c=c;
+dt.innerHTML=`<summary><span>${c}</span><span class="cnt"></span></summary>`;
+D.filter(d=>d[1]===c).forEach(d=>{const r=document.createElement("div");r.className="row";r.dataset.n=d[0];r.dataset.t=d[2].toLowerCase();
+r.innerHTML=`<div class="nm"><b>${d[2]}</b><span class="pr"></span></div><div class="q"><button data-d="-1">−</button><input type="number" inputmode="decimal" min="0" step="any" placeholder="0"><button data-d="1">+</button></div>`;
+dt.appendChild(r)});L.appendChild(dt)});
+function setQ(r,v){v=Math.max(0,v||0);const n=+r.dataset.n;if(v)qty[n]=v;else delete qty[n];r.querySelector("input").value=v||"";upd()}
+L.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const r=b.closest(".row");setQ(r,Math.round(((qty[+r.dataset.n]||0)+ +b.dataset.d)*100)/100)});
+L.addEventListener("change",e=>{if(e.target.tagName==="INPUT")setQ(e.target.closest(".row"),parseFloat(e.target.value))});
+function sel(){return D.filter(d=>qty[d[0]]).map(d=>({d,q:qty[d[0]]}))}
+function tot(){let a=0;sel().forEach(({d,q})=>{a+=q*up(d)});const ds=V===4?a*DISC/100:0;return{a,ds,t:a-ds}}
+function upd(){const T=tot();tv.textContent=f(T.t)+" €";lbl.textContent=V===4?"Общо след отстъпка "+DISC+"%":"Общо";pdf.disabled=!T.a;
+document.querySelectorAll(".row").forEach(r=>{const d=D[+r.dataset.n-1];r.classList.toggle("on",!!qty[+r.dataset.n]);r.querySelector(".pr").textContent=f(up(d))+" € / "+d[3]});
+document.querySelectorAll("details").forEach(dt=>{const k=D.filter(d=>d[1]===dt.dataset.c&&qty[d[0]]).length;dt.querySelector(".cnt").textContent=k?k+" избрани":""})}
+s.addEventListener("input",()=>{const v=s.value.trim().toLowerCase();document.querySelectorAll(".row").forEach(r=>r.style.display=!v||r.dataset.t.includes(v)?"":"none");
+document.querySelectorAll("details").forEach(dt=>{if(v)dt.open=[...dt.querySelectorAll(".row")].some(r=>r.style.display!=="none")})});
+clr.onclick=()=>{Object.keys(qty).forEach(k=>delete qty[k]);document.querySelectorAll(".row input").forEach(i=>i.value="");upd()};
+// ---- PDF: страници като JPEG в минимален PDF (поддържа кирилица) ----
+const W=1240,H=1754,M=80,FONT='"Segoe UI",Roboto,Arial,sans-serif';
+function wrap(c,t,w){const ws=t.split(" ");let ln="",o=[];ws.forEach(x=>{const y=ln?ln+" "+x:x;if(c.measureText(y).width>w&&ln){o.push(ln);ln=x}else ln=y});o.push(ln);return o}
+function pages(){const items=sel(),P=[];let cv,c,y,pg=0;
+const cols={n:M,t:M+60,u:700,q:790,p:880,s:1060};
+function np(){cv=document.createElement("canvas");cv.width=W;cv.height=H;c=cv.getContext("2d");c.fillStyle="#fff";c.fillRect(0,0,W,H);c.fillStyle="#111";P.push(cv);pg++;y=M;
+if(pg===1){c.font=`bold 44px ${FONT}`;c.fillText("Ценова оферта – електромонтажни услуги",M,y+40);y+=70;c.font=`26px ${FONT}`;c.fillStyle="#555";
+c.fillText("Дата: "+new Date().toLocaleDateString("bg-BG")+"   •   Цени в EUR, само труд",M,y);y+=36;const k=cl.value.trim();if(k){c.fillStyle="#111";c.fillText("Клиент / обект: "+k,M,y);y+=36}y+=14}
+hd()}
+function hd(){c.fillStyle="#f3f4f6";c.fillRect(M,y,W-2*M,46);c.fillStyle="#111";c.font=`bold 22px ${FONT}`;
+[["№",cols.n],["Дейност",cols.t],["Мярка",cols.u],["Кол.",cols.q],["Ед. цена (€)",cols.p],["Сума (€)",cols.s]].forEach(([t,x])=>c.fillText(t,x+8,y+31));y+=46}
+np();let A=0,i=0;
+items.forEach(({d,q})=>{c.font=`22px ${FONT}`;const ls=wrap(c,d[2],cols.u-cols.t-16),h=Math.max(1,ls.length)*28+18;
+if(y+h>H-M-120){np()}
+c.fillStyle="#111";c.font=`22px ${FONT}`;i++;c.fillText(String(i),cols.n+8,y+32);ls.forEach((t,j)=>c.fillText(t,cols.t+8,y+32+j*28));
+c.fillText(d[3],cols.u+8,y+32);c.fillText(String(q).replace(".",","),cols.q+8,y+32);
+const u1=up(d);c.fillText(f(u1),cols.p+8,y+32);const s1=q*u1;A+=s1;c.fillText(f(s1),cols.s+8,y+32);
+y+=h;c.strokeStyle="#e5e7eb";c.beginPath();c.moveTo(M,y);c.lineTo(W-M,y);c.stroke()});
+if(y+240>H-M)np();y+=30;c.fillStyle="#111";c.font=`bold 30px ${FONT}`;
+const ds=V===4?A*DISC/100:0;if(ds){c.font=`24px ${FONT}`;c.fillText("Сума: "+f(A)+" €",M,y+24);y+=36;c.fillText("Отстъпка "+DISC+"%: −"+f(ds)+" €",M,y+24);y+=44}
+c.font=`bold 30px ${FONT}`;c.fillStyle="#111";c.fillText("ОБЩО: "+f(A-ds)+" €",M,y+30);y+=60;
+c.font=`20px ${FONT}`;c.fillStyle="#666";wrap(c,NOTE,W-2*M).forEach(t=>{c.fillText(t,M,y+20);y+=28});
+P.forEach((p,k)=>{const x=p.getContext("2d");x.font=`18px ${FONT}`;x.fillStyle="#999";x.fillText(`Стр. ${k+1} / ${P.length}`,W-M-110,H-40)});
+return P}
+function pdfBytes(P){const enc=new TextEncoder(),ch=[];let len=0,off=[];const add=x=>{const b=typeof x==="string"?enc.encode(x):x;ch.push(b);len+=b.length};
+const N=P.length;add("%PDF-1.4\n");const o=(id,fn)=>{off[id]=len;add(id+" 0 obj\n");fn();add("\nendobj\n")};
+o(1,()=>add("<</Type/Catalog/Pages 2 0 R>>"));
+o(2,()=>add("<</Type/Pages/Count "+N+"/Kids["+P.map((_,k)=>(3+k*3)+" 0 R").join(" ")+"]>>"));
+P.forEach((p,k)=>{const b=3+k*3,j=atob(p.toDataURL("image/jpeg",.92).split(",")[1]),u=Uint8Array.from(j,x=>x.charCodeAt(0));
+o(b,()=>add(`<</Type/Page/Parent 2 0 R/MediaBox[0 0 595.28 841.89]/Resources<</XObject<</I ${b+1} 0 R>>>>/Contents ${b+2} 0 R>>`));
+o(b+1,()=>{add(`<</Type/XObject/Subtype/Image/Width ${W}/Height ${H}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${u.length}>>\nstream\n`);add(u);add("\nendstream")});
+const cs="q 595.28 0 0 841.89 0 0 cm /I Do Q";o(b+2,()=>add(`<</Length ${cs.length}>>\nstream\n${cs}\nendstream`))});
+const xr=len,T=3+N*3;add("xref\n0 "+T+"\n0000000000 65535 f \n");for(let i=1;i<T;i++)add(String(off[i]).padStart(10,"0")+" 00000 n \n");
+add(`trailer\n<</Size ${T}/Root 1 0 R>>\nstartxref\n${xr}\n%%EOF`);
+const out=new Uint8Array(len);let p=0;ch.forEach(b=>{out.set(b,p);p+=b.length});return out}
+pdf.onclick=async()=>{const m=document.getElementById("msg");m.textContent="";
+try{const bytes=pdfBytes(pages()),name="oferta-elektromontazh.pdf",file=new File([bytes],name,{type:"application/pdf"});
+if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name});m.textContent="Готово ✓";return}catch(e){if(e&&e.name==="AbortError")return}}
+const u=URL.createObjectURL(file),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);m.textContent="Готово ✓"}
+catch(e){m.textContent="Грешка при създаване на PDF."}}
+vb.onclick=e=>{const b=e.target.closest("button");if(!b)return;V=+b.dataset.v;vb.querySelectorAll(".seg button").forEach(x=>x.classList.toggle("on",x===b));dw.hidden=V!==4;upd()};
+dr.oninput=()=>{DISC=+dr.value;dv.textContent=DISC+"%";upd()};
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+upd();
+</script></body></html>
